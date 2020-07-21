@@ -1,0 +1,17 @@
+{
+  "name": "checkout",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha *.test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^8.0.1"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
