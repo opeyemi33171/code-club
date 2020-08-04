@@ -1,23 +1,12 @@
-const { scan } = require("./checkout");
+const { DEFAULT_PORT, startServer, itemAPrice } = require("./checkout");
 const assert = require("assert");
 const fetch = require("node-fetch");
-const http = require("http");
 
 describe("Checkout kata", () => {
-  const port = 7070;
   let server;
-  let total;
 
   beforeEach(() => {
-    total = 0;
-
-    server = http.createServer((req, res) => {
-      if (req.method == "POST") total++;
-      res.statusCode = req.method === "GET" ? 200 : 204;
-
-      res.end(total.toString());
-    });
-    server.listen(port);
+    server = startServer(DEFAULT_PORT);
   });
 
   afterEach(() => {
@@ -25,7 +14,7 @@ describe("Checkout kata", () => {
   });
 
   it("returns 204 ok response when item scanned", async () => {
-    const response = await fetch(`http://localhost:${port}/scan/item1`, {
+    const response = await fetch(`http://localhost:${DEFAULT_PORT}/scan/A`, {
       method: "POST",
     });
 
@@ -33,7 +22,7 @@ describe("Checkout kata", () => {
   });
 
   it("returns 200 ok response when total is requested", async () => {
-    const response = await fetch(`http://localhost:${port}/total`, {
+    const response = await fetch(`http://localhost:${DEFAULT_PORT}/total`, {
       method: "GET",
     });
 
@@ -41,14 +30,25 @@ describe("Checkout kata", () => {
     assert.equal(await response.text(), "0");
   });
 
-  it("returns non zero total after item is scanned", async () => {
-    await fetch(`http://localhost:${port}/scan/item1`, {
+  it("returns price of item A after it is scanned", async () => {
+    await fetch(`http://localhost:${DEFAULT_PORT}/scan/A`, {
       method: "POST",
     });
-    const response = await fetch(`http://localhost:${port}/total`, {
+    const response = await fetch(`http://localhost:${DEFAULT_PORT}/total`, {
       method: "GET",
     });
     assert.equal(response.status, 200);
-    assert.notEqual(await response.text(), "0");
+    assert.equal(await response.text(), itemAPrice);
+  });
+
+  it("returns price of item B after it is scanned", async () => {
+    await fetch(`http://localhost:${DEFAULT_PORT}/scan/B`, {
+      method: "POST",
+    });
+    const response = await fetch(`http://localhost:${DEFAULT_PORT}/total`, {
+      method: "GET",
+    });
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "30");
   });
 });
