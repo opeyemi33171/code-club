@@ -6,19 +6,16 @@ const isTailorMadePlan = (planType) => {
 const app = {
   options: null,
   constructInstallmentsQueryString: function () {
-    const OTHER = "other";
     let plansEndpoint = "/plans?";
-    let holderDob = "holder_dob=" + this.holderDateOfBirth();
-    let productTypeBESPOKE = "&product_type=BESPOKE";
+    
     let funeralType =
       "&funeral_type=" + this.options.funeral.type.toUpperCase();
     let setPlanType = "&set_plan_type=" + this.options.plan.tier.toUpperCase();
-    let thirdParty = this.options.thirdParty
-    let thirdPartyProductCost =
-      "&third_party_product_cost=" + thirdParty.price;
 
-    let getInstallments = plansEndpoint + holderDob + funeralType;
-    if (isTailorMadePlan(this.options.plan.type)) {
+    let getInstallments = plansEndpoint;
+    getInstallments += this.getQueryString(funeralType);
+    if (isTailorMadePlan(this.options.plan.type)){
+      let productTypeBESPOKE = "&product_type=BESPOKE";
       getInstallments += productTypeBESPOKE;
     } else {
       getInstallments += nonTailorMadeQueryString(setPlanType, this.options.thirdParty);
@@ -34,6 +31,10 @@ const app = {
     }
 
     return getInstallments;
+  },
+  getQueryString(funeralType) {
+    let holderDob2 = "holder_dob=" + this.holderDateOfBirth();
+    return holderDob2 + funeralType;
   },
   holderDateOfBirth() {
     let formattedDateOfBirth = this.options.details.date_of_birth.split("/");
@@ -78,17 +79,14 @@ app.options = {
     price: 0,
   },
 };
-console.log(app.constructInstallmentsQueryString());
 
 module.exports = { app };
+
 function nonTailorMadeQueryString(setPlanType, thirdParty) {
-  let thirdPartyProductCost2 =
-  "&third_party_product_cost=" + thirdParty.price;
   const OTHER = "other";
-  let productTypeSET = "&product_type=SET";
-  let getInstallments = productTypeSET + setPlanType;
+  let getInstallments = `&product_type=SET${setPlanType}`;
   if (thirdParty.selected === OTHER) {
-    getInstallments += thirdPartyProductCost2;
+    getInstallments += `&third_party_product_cost=${thirdParty.price}`;
   }
   return getInstallments;
 }
