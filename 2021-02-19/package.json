@@ -1,5 +1,5 @@
 {
-  "name": "codeclub",
+  "name": "2021-02-19",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,7 +7,7 @@
     "test": "jest"
   },
   "author": "",
-  "lcense": "ISC",
+  "license": "ISC",
   "dependencies": {
     "jest": "^26.6.3"
   }

@@ -2,18 +2,17 @@ function add(numbers) {
   if (numbers.length === 0) {
     return 0;
   }
-  if (numbers.length >= 3) {
-    let numbersArray = numbers.split(",");
-    if (numbersArray.length === 3) {
-      return (
-        parseInt(numbersArray[0]) +
-        parseInt(numbersArray[1]) +
-        parseInt(numbersArray[2])
-      );
-    }
-    return parseInt(numbersArray[0]) + parseInt(numbersArray[1]);
-  }
-  return parseInt(numbers);
+
+  let numbersArray = numbers.split(",").map(parseNumbers);
+  return numbersArray.reduce(sum);
+}
+
+function parseNumbers(numberString){
+  return parseInt(numberString);
+}
+
+function sum(firstNumber, secondNumber) {
+  return firstNumber + secondNumber;
 }
 
 describe("calculator tests", () => {
@@ -40,5 +39,9 @@ describe("calculator tests", () => {
   });
   it("should return 3 for a string of '1,1,1'", () => {
     expect(add("1,1,1")).toBe(3);
+  });
+
+ it("should return 100 for a string of '100'", () => {
+    expect(add("100")).toBe(100);
   });
 });
