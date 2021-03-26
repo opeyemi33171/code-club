@@ -3,37 +3,42 @@ const isTailorMadePlan = (planType) => {
   return planType === TAILORMADE;
 };
 
+const makeFirstQueryParam = (key, value) => `?${key}=${value}`
+const makeQueryParam = (key, value) => `&${key}=${value}`
+
+const NO = "N";
+const YES = "Y";
+
 const app = {
   options: null,
   constructInstallmentsQueryString: function () {
-    let plansEndpoint = "/plans?";
-    
-    let funeralType =
-      "&funeral_type=" + this.options.funeral.type.toUpperCase();
-    let setPlanType = "&set_plan_type=" + this.options.plan.tier.toUpperCase();
+    const plansEndpoint = "/plans"
+    return plansEndpoint + this.queryString();
+  },
 
-    let getInstallments = plansEndpoint;
+  queryString(){
+    const funeralType = makeQueryParam('funeral_type', this.options.funeral.type.toUpperCase());
+    const setPlanType = makeQueryParam("set_plan_type", this.options.plan.tier.toUpperCase());
+
+    let getInstallments = '';
     getInstallments += this.getQueryString(funeralType);
     if (isTailorMadePlan(this.options.plan.type)){
-      let productTypeBESPOKE = "&product_type=BESPOKE";
-      getInstallments += productTypeBESPOKE;
+      getInstallments += makeQueryParam('product_type', 'BESPOKE');
     } else {
       getInstallments += nonTailorMadeQueryString(setPlanType, this.options.thirdParty);
     }
 
     if (this.options.details.is_client === false) {
-      let forPayer = "&for_purchaser=N";
-      let payerDob = "&purchaser_dob=" + this.payerDateOfBirth();
-      getInstallments += forPayer + payerDob;
+      getInstallments += makeQueryParam('for_purchaser', NO)
+      getInstallments += makeQueryParam('purchaser_dob', this.payerDateOfBirth());
     } else {
-      let forPayer = "&for_purchaser=Y";
-      getInstallments += forPayer;
+      getInstallments += makeQueryParam("for_purchaser", YES);
     }
-
     return getInstallments;
   },
+
   getQueryString(funeralType) {
-    let holderDob2 = "holder_dob=" + this.holderDateOfBirth();
+    let holderDob2 = makeFirstQueryParam("holder_dob", this.holderDateOfBirth());
     return holderDob2 + funeralType;
   },
   holderDateOfBirth() {
@@ -84,9 +89,10 @@ module.exports = { app };
 
 function nonTailorMadeQueryString(setPlanType, thirdParty) {
   const OTHER = "other";
-  let getInstallments = `&product_type=SET${setPlanType}`;
+  let getInstallments = makeQueryParam("product_type", `SET`);
+  getInstallments += setPlanType;
   if (thirdParty.selected === OTHER) {
-    getInstallments += `&third_party_product_cost=${thirdParty.price}`;
+    getInstallments += makeQueryParam("third_party_product_cost", thirdParty.price);
   }
   return getInstallments;
 }
