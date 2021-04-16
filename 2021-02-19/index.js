@@ -17,52 +17,43 @@ const app = {
   },
 
   queryString(){
-    const funeralType = makeQueryParam('funeral_type', this.options.funeral.type.toUpperCase());
-    const setPlanType = makeQueryParam("set_plan_type", this.options.plan.tier.toUpperCase());
+    const holderDateOfBirth = this.formatDateOfBirth(this.options.details.date_of_birth);
+    const payerDateOfBirth = this.formatDateOfBirth(this.options.details.payer.date_of_birth);
+    let getInstallments = makeFirstQueryParam("holder_dob", holderDateOfBirth);
+    getInstallments += makeQueryParam('funeral_type', this.options.funeral.type.toUpperCase());
 
-    let getInstallments = '';
-    getInstallments += this.getQueryString(funeralType);
     if (isTailorMadePlan(this.options.plan.type)){
       getInstallments += makeQueryParam('product_type', 'BESPOKE');
     } else {
-      getInstallments += nonTailorMadeQueryString(setPlanType, this.options.thirdParty);
+      const OTHER = "other";
+      const thirdParty = this.options.thirdParty;
+      getInstallments += makeQueryParam("product_type", `SET`);
+      getInstallments += makeQueryParam("set_plan_type", this.options.plan.tier.toUpperCase());
+      if (thirdParty.selected === OTHER) {
+        getInstallments += makeQueryParam("third_party_product_cost", thirdParty.price);
+      } 
     }
 
     if (this.options.details.is_client === false) {
       getInstallments += makeQueryParam('for_purchaser', NO)
-      getInstallments += makeQueryParam('purchaser_dob', this.payerDateOfBirth());
+      getInstallments += makeQueryParam('purchaser_dob', payerDateOfBirth);
     } else {
       getInstallments += makeQueryParam("for_purchaser", YES);
     }
     return getInstallments;
   },
-
-  getQueryString(funeralType) {
-    let holderDob2 = makeFirstQueryParam("holder_dob", this.holderDateOfBirth());
-    return holderDob2 + funeralType;
-  },
-  holderDateOfBirth() {
-    let formattedDateOfBirth = this.options.details.date_of_birth.split("/");
-    let holderDateOfBirth = new Date(
-      formattedDateOfBirth[2],
-      formattedDateOfBirth[1] - 1,
-      formattedDateOfBirth[0]
-    );
-
-    return holderDateOfBirth.toJSON().substring(0, 10);
-  },
-  payerDateOfBirth() {
-    let formattedDateOfBirth = this.options.details.payer.date_of_birth.split(
+  formatDateOfBirth(dateOfBirth) {
+    const splitDateOfBirth = dateOfBirth.split(
       "/"
     );
-    let payerDateOfBirth = new Date(
-      formattedDateOfBirth[2],
-      formattedDateOfBirth[1] - 1,
-      formattedDateOfBirth[0]
+    const formattedDateOfBirth = new Date(
+      splitDateOfBirth[2],
+      splitDateOfBirth[1] - 1,
+      splitDateOfBirth[0]
     );
 
-    return payerDateOfBirth.toJSON().substring(0, 10);
-  },
+    return formattedDateOfBirth.toJSON().substring(0, 10);
+  }
 };
 
 app.options = {
@@ -87,12 +78,4 @@ app.options = {
 
 module.exports = { app };
 
-function nonTailorMadeQueryString(setPlanType, thirdParty) {
-  const OTHER = "other";
-  let getInstallments = makeQueryParam("product_type", `SET`);
-  getInstallments += setPlanType;
-  if (thirdParty.selected === OTHER) {
-    getInstallments += makeQueryParam("third_party_product_cost", thirdParty.price);
-  }
-  return getInstallments;
-}
+
